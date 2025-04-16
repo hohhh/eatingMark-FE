@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { fetchPlaces } from "../api/placesAPI";
-function useFetch() {
+
+function useFetch(location) {
   const [places, setPlaces] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // false?
+  const [error, setError] = useState(null); // null ?
 
   useEffect(() => {
     const loadData = async () => {
