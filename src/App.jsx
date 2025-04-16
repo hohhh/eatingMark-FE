@@ -1,10 +1,12 @@
-import { useState } from "react";
+import CardList from "./components/CardList";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  return <></>;
+  return (
+    <>
+      <CardList />
+    </>
+  );
 }
 
 export default App;
