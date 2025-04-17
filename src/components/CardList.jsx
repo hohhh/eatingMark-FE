@@ -5,6 +5,7 @@ import { sortPlacesByDistance } from "../util/loc";
 import { postLikedPlace, deleteLikedPlace } from "../api/placesAPI";
 import Card from "./Card";
 import Error from "./Error";
+import toast from "react-hot-toast";
 
 const CardList = () => {
   const location = useLocation();
@@ -26,9 +27,11 @@ const CardList = () => {
     if (alreadyLiked) {
       await deleteLikedPlace(place.id); // API 호출
       setLikedPlaces((prev) => prev.filter((p) => p.id !== place.id));
+      toast.success("찜한 맛집에 추가됐습니다!");
     } else {
       await postLikedPlace(place); // API 호출
       setLikedPlaces((prev) => [...prev, place]);
+      toast.error("찜한 맛집에서 제거됐습니다.");
     }
   };
 
