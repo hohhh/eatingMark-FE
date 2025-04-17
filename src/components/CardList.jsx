@@ -1,69 +1,46 @@
+import { useState, useEffect, useMemo } from "react";
 import useFetch from "../useHooks/useFetch";
+import useLocation from "../useHooks/useLocation";
 import { sortPlacesByDistance } from "../util/loc";
+import { postLikedPlace, deleteLikedPlace } from "../api/placesAPI";
 import Card from "./Card";
 import Error from "./Error";
-import { useEffect, useMemo, useState } from "react";
-import useLocation from "../useHooks/useLocation.jsx";
-import {
-  postLikedPlace,
-  deleteLikedPlace,
-  fetchLikedPlaces,
-} from "../api/placesAPI";
 
 const CardList = () => {
   const location = useLocation();
   const { isLoading, error, places } = useFetch(location);
-  const [likedPlaces, setLikedPlaces] = useState([]);
-  const [showLikedOnly, setShowLikedOnly] = useState(false);
 
-  function handleClickShowLikedOnly() {
-    setShowLikedOnly(!showLikedOnly);
-    getLikedPlaces();
-  }
+  const [likedPlaces, setLikedPlaces] = useState([]); // 찜 목록
+  const [showLikedOnly, setShowLikedOnly] = useState(false); // 필터 여부
 
   const sortedPlaces = useMemo(() => {
     if (!places) return [];
     return sortPlacesByDistance(places, location.latitude, location.longitude);
   }, [places, location.latitude, location.longitude]);
 
+  const displayPlaces = showLikedOnly ? likedPlaces : sortedPlaces;
+
   const toggleLike = async (place) => {
-    try {
-      // const alreadyLiked = likedPlaces.find((liked) => liked.id === place.id);
-      // if (alreadyLiked) {
-      //   // await deleteLikedPlace(place.id);
-      // } else {
-      console.log(place);
-      await postLikedPlace(place);
-      // }
-    } catch (err) {
-      console.error("찜 토글 실패:", err.message);
+    const alreadyLiked = likedPlaces.some((p) => p.id === place.id);
+
+    if (alreadyLiked) {
+      await deleteLikedPlace(place.id); // API 호출
+      setLikedPlaces((prev) => prev.filter((p) => p.id !== place.id));
+    } else {
+      await postLikedPlace(place); // API 호출
+      setLikedPlaces((prev) => [...prev, place]);
     }
   };
 
-  const getLikedPlaces = async () => {
-    const data = await fetchLikedPlaces();
-    setLikedPlaces(data.places);
-    console.log(data);
-  };
-
-  useEffect(() => {
-    getLikedPlaces();
-  }, []);
-
-  const displayPlaces = useMemo(() => {
-    return showLikedOnly ? likedPlaces : sortedPlaces;
-  }, [showLikedOnly, likedPlaces, sortedPlaces]);
-
-  if (isLoading) return <div>Loading ... 💫</div>;
+  if (isLoading) return <div>Loading... 💫</div>;
   if (error) return <Error />;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
-      {/* 타이틀 + 버튼 좌우 정렬 ✅ */}
       <div className="flex justify-between items-center max-w-screen-md mx-auto px-4 py-6">
         <h1 className="text-xl font-bold">📍 맛집리스트</h1>
         <button
-          onClick={handleClickShowLikedOnly}
+          onClick={() => setShowLikedOnly((prev) => !prev)}
           className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded"
         >
           {showLikedOnly ? "전체 보기" : "찜한 맛집만 보기"}
@@ -72,14 +49,20 @@ const CardList = () => {
 
       <div className="w-full flex justify-center">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-screen-md w-full p-4">
-          {displayPlaces.map((place) => (
-            <Card
-              key={place.id}
-              place={place}
-              toggleLike={toggleLike}
-              likedPlaces={likedPlaces}
-            />
-          ))}
+          {displayPlaces.length > 0 ? (
+            displayPlaces.map((place) => (
+              <Card
+                key={place.id}
+                place={place}
+                toggleLike={toggleLike}
+                likedPlaces={likedPlaces}
+              />
+            ))
+          ) : showLikedOnly ? (
+            <div className="text-center text-gray-400 col-span-3 py-10">
+              😢 찜한 맛집이 없습니다
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
