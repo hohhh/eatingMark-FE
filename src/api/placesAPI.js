@@ -2,10 +2,68 @@ export const BASE_URL = "http://localhost:3000";
 // API 서버 주소 : 고정 상수로 관리
 
 // 정의할때 함수앞에 async, 호출할 때 await
+export const postLikedPlace = async (place) => {
+  const res = await fetch(`${BASE_URL}/users/places`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json", // ✅ 요거 없으면 서버는 undefined 받음
+    },
+    body: JSON.stringify({ place }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`찜 추가 실패: ${res.status}`);
+  }
+
+  return await res.json(); // ✅ 성공하면 response 받아서 넘겨줘야 이후 로직에서 사용 가능
+};
+
+// 찜 삭제
+export const deleteLikedPlace = async (id) => {
+  const res = await fetch(`${BASE_URL}/users/places/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify(id),
+  });
+
+  if (!res.ok) {
+    throw new Error(`찜 삭제 실패: ${res.status}`);
+  }
+};
 
 export const fetchPlaces = async () => {
   try {
     const res = await fetch(`${BASE_URL}/places`);
+    // 서버에 GET 요청
+
+    if (!res.ok) {
+      throw new Error(`서버 오류: ${res.status}`);
+    }
+    // 서버 응답 상태코드 확인
+    // 응답 코드 200 아니면 에러 (예외 강제 발생)
+    // 이 에러는 catch문으로 떨어짐
+
+    const data = await res.json();
+    console.log("성공:", data);
+    // 응답 본문을 JS 객체로 변환
+
+    return data;
+    // 호출한 컴포넌트로 반환
+  } catch (err) {
+    console.error("에러 발생:", err.message);
+    // 오류 발생 시 디버깅용 로그
+    // (나중에 UI에서 메세지로 쓸 수도 있음)
+
+    throw err;
+    // 에러를 다시 던져서 호출한 쪽에서도 에러 인식할 수 있도록
+    // 상위에서 처리 가능하게
+  } finally {
+    console.log("요청 종료");
+  }
+};
+
+export const fetchLikedPlaces = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/users/places`);
     // 서버에 GET 요청
 
     if (!res.ok) {
