@@ -1,37 +1,21 @@
+import axios from "axios";
+
 export const BASE_URL = "http://localhost:3000";
 // API 서버 주소 : 고정 상수로 관리
-
 // 정의할때 함수앞에 async, 호출할 때 await
-export const postLikedPlace = async (place) => {
-  const res = await fetch(`${BASE_URL}/users/places`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json", // ✅ 요거 없으면 서버는 undefined 받음
-    },
-    body: JSON.stringify({ place }),
-  });
 
-  if (!res.ok) {
-    throw new Error(`찜 추가 실패: ${res.status}`);
-  }
-
-  return await res.json(); // ✅ 성공하면 response 받아서 넘겨줘야 이후 로직에서 사용 가능
-};
-
-// 찜 삭제
-export const deleteLikedPlace = async (id) => {
-  const res = await fetch(`${BASE_URL}/users/places/${id}`, {
-    method: "DELETE",
-    body: JSON.stringify(id),
-  });
-
-  if (!res.ok) {
-    throw new Error(`찜 삭제 실패: ${res.status}`);
-  }
-};
-
+// 전체 맛집 목록 조회 (데이터 불러오기)
 export const fetchPlaces = async () => {
+  /* aixos */
   try {
+    const res = await axios.get(`${BASE_URL}/places`);
+    // return res.data;
+    // console.log("성공:", res.data);
+  } catch (err) {
+    console.log("에러 발생:", err.message);
+  }
+  /* fetch */
+  /*   try {
     const res = await fetch(`${BASE_URL}/places`);
     // 서버에 GET 요청
 
@@ -58,11 +42,22 @@ export const fetchPlaces = async () => {
     // 상위에서 처리 가능하게
   } finally {
     console.log("요청 종료");
-  }
+  } */
 };
 
+// 찜한 맛집 목록 조회
 export const fetchLikedPlaces = async () => {
+  /* axios */
   try {
+    const res = await axios.get(`${BASE_URL}/users/places`);
+    return res.data;
+    // console.log("성공:", res.data);
+  } catch (err) {
+    console.log("에러 발생:", err.message);
+  }
+
+  /* fetch */
+  /*   try {
     const res = await fetch(`${BASE_URL}/users/places`);
     // 서버에 GET 요청
 
@@ -89,7 +84,52 @@ export const fetchLikedPlaces = async () => {
     // 상위에서 처리 가능하게
   } finally {
     console.log("요청 종료");
+  } */
+};
+
+// 찜 추가
+export const postLikedPlace = async (place) => {
+  /* axios */
+  try {
+    const place = { place };
+    const res = await axios.post(`${BASE_URL}/users/places`, place);
+    return res.data;
+  } catch (err) {
+    console.log(`찜 추가 실패: ${err.status}`);
   }
+  /* fetch */
+  /*  const res = await fetch(`${BASE_URL}/users/places`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json", // ✅ 요거 없으면 서버는 undefined 받음
+    },
+    body: JSON.stringify({ place }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`찜 추가 실패: ${res.status}`);
+  }
+
+  return await res.json(); // ✅ 성공하면 response 받아서 넘겨줘야 이후 로직에서 사용 가능 */
+};
+
+// 찜 삭제
+export const deleteLikedPlace = async (id) => {
+  /* axios */
+  try {
+    const res = await axios.delete(`${BASE_URL}/users/places/${id}`);
+  } catch (err) {
+    console.log(`찜 삭제 실패: ${err.status}`);
+  }
+  /* fetch */
+  /*   const res = await fetch(`${BASE_URL}/users/places/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify(id),
+  });
+
+  if (!res.ok) {
+    throw new Error(`찜 삭제 실패: ${res.status}`);
+  } */
 };
 
 // try-catch 쓸 때
